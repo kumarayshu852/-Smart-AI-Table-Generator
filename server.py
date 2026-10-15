@@ -38,7 +38,7 @@ def get_table(number: int):
         status = "🧠 It was remembered! Loaded from the database."
     else:
         # 3. AGAR NAYA HAI TOH ZERO SE TRAIN KARNA 🔥
-        status = "❌ I didn't remember. I learned something new in MongoDB and saved it!"
+        status = "❌ I didn't remember. I learned something new in Database and saved it!"
         
         weight = 0.0  
         learning_rate = 0.01  
