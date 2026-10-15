@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart AI Table Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f7f6; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; min-width: 300px; }
+        input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; width: 80px; text-align: center; }
+        button { padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; }
+        button:hover { background: #0056b3; }
+        #status { font-weight: bold; margin-top: 20px; color: #555; font-size: 16px; }
+        #result { margin-top: 20px; text-align: left; display: inline-block; font-size: 20px; font-family: 'Courier New', Courier, monospace; font-weight: bold; line-height: 1.8; color: #333; }
+        
+        /* Loader/Spinner ka CSS Animation 🔄 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none; /* Shuruat mein chupa rahega */
+            margin: 20px auto 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🧠 Smart AI Table Generator</h2>
+    <p>Enter your number and check your memory:</p>
+    <input type="number" id="numInput" value="5">
+    <button id="genBtn" onclick="fetchTable()">Generate Table</button>
+    
+    <!-- Loader Element -->
+    <div id="loader" class="loader"></div>
+    <div id="status"></div>
+    <div id="result"></div>
+</div>
+
+<script>
+    async function fetchTable() {
+        const num = document.getElementById('numInput').value;
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        const loaderDiv = document.getElementById('loader');
+        const btn = document.getElementById('genBtn');
+        
+        // 1. Shuruat mein UI reset karna aur Loader dikhana
+        btn.disabled = true; // Button ko temporary block karna jab tak table ban raha ho
+        loaderDiv.style.display = "block"; 
+        statusDiv.innerText = "He is working things out from behind the scenes...";
+        resultDiv.innerHTML = "";
+
+        try {
+            // Frontend se Python server par request bhejna
+            const response = await fetch(`http://127.0.0.1:8000/get-table/${num}`);
+            const data = await response.json();
+            
+            // 2. Data aane ke baad loader ko chupana
+            loaderDiv.style.display = "none";
+            statusDiv.innerText = data.status;
+            
+            // 3. ChatGPT-Style Typewriter Effect ⚡
+            let lines = data.table;
+            let currentLine = 0;
+            
+            function printLineOneByOne() {
+                if (currentLine < lines.length) {
+                    // Ek-ek karke line ko joadna aur break tag lagana
+                    resultDiv.innerHTML += lines[currentLine] + "<br>";
+                    currentLine++;
+                    // 250 milliseconds (0.25 second) ka delay har line ke beech mein
+                    setTimeout(printLineOneByOne, 250); 
+                } else {
+                    btn.disabled = false; // Pura table hone ke baad button wapas chalu
+                }
+            }
+            
+            // Typewriter effect ko trigger karna
+            printLineOneByOne();
+
+        } catch (error) {
+            loaderDiv.style.display = "none";
+            btn.disabled = false;
+            statusDiv.innerText = "❌ Could not connect to the server! Please run the server first.";
+        }
+    }
+</script>
+</body>
+</html>
